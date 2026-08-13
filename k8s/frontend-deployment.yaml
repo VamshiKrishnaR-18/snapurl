@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: snapurl-frontend:latest
-          imagePullPolicy: Never
+          image: vamshi7923/snapurl-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5173
