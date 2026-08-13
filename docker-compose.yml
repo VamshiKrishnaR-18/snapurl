@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./snapurl-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb+srv://vamshisid18_db_user:gyn0KxUrA1kKnbdP@cluster0.cxzwj81.mongodb.net/
+
+  frontend:
+    build: ./snapurl-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
