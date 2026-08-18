@@ -9,19 +9,11 @@ pipeline {
             }
         }
         
-        stage('Build Backend') {
+        stage('Build & Test Backend') {
             steps {
-                echo 'Installing Node.js dependencies for the backend...'
+                echo 'Installing backend dependencies and running tests...'
                 dir('snapurl-backend') {
                     bat 'npm install'
-                }
-            }
-        }
-
-        stage('Test Backend') {
-            steps {
-                echo 'Executing backend automated tests...'
-                dir('snapurl-backend') {
                     bat 'npm test'
                 }
             }
@@ -29,16 +21,18 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                echo 'Installing Node.js dependencies for the frontend...'
+                echo 'Installing frontend dependencies and compiling React app...'
                 dir('snapurl-frontend') {
                     bat 'npm install'
+                    // This executes the Vite build script from your package.json
+                    bat 'npm run build' 
                 }
             }
         }
 
         stage('Result') {
             steps {
-                echo 'Full-stack Build and Test automation stages executed successfully.'
+                echo 'Full-stack automation stages executed successfully.'
             }
         }
     }
@@ -51,7 +45,7 @@ pipeline {
             echo 'Status: SUCCESS - Both backend and frontend built successfully.'
         }
         failure {
-            echo 'Status: FAILURE - The build or test stage failed. Please check the logs.'
+            echo 'Status: FAILURE - The pipeline failed. Please check the logs.'
         }
         cleanup {
             echo 'Cleaning up workspace...'
