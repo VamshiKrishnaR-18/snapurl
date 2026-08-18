@@ -2,7 +2,7 @@
 
 SnapURL is a full-stack URL shortening application. It features a React-based frontend, a Node.js backend, and a MongoDB database. The repository is fully equipped for modern DevOps pipelines, including Docker containerization and Kubernetes deployment manifests.
 
-## 🏗️ Architecture overview
+## Architecture overview
 
 The repository is divided into distinct microservices and deployment configurations:
 
