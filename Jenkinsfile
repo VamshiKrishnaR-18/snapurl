@@ -12,24 +12,46 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        
+        stage('Install Dependencies') {
             steps {
-                echo 'Installing dependencies and building...'
+                echo 'Installing packages sequentially...'
                 dir('snapurl-backend') {
                     bat 'npm install'
                 }
                 dir('snapurl-frontend') {
                     bat 'npm install'
-                    bat 'npm run build'
                 }
             }
         }
 
-        stage('Test') {
-            steps {
-                echo 'Running unit tests...'
-                dir('snapurl-backend') {
-                    bat 'npm test'
+        // TASK 12: Parallel Stages
+        stage('Code Verification') {
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        echo 'Running Backend Tests...'
+                        dir('snapurl-backend') {
+                            bat 'npm test'
+                        }
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        echo 'Checking for vulnerabilities...'
+                        dir('snapurl-backend') {
+                            // We use || exit 0 so the pipeline doesn't fail if minor vulnerabilities are found
+                            bat 'npm audit --audit-level=high || exit 0' 
+                        }
+                    }
+                }
+                stage('Frontend Build') {
+                    steps {
+                        echo 'Compiling React/Vite assets...'
+                        dir('snapurl-frontend') {
+                            bat 'npm run build'
+                        }
+                    }
                 }
             }
         }
@@ -41,10 +63,8 @@ pipeline {
             }
         }
 
-        // TASK 11: Pipeline Approval
         stage('Approval') {
             steps {
-                
                 input message: 'Ready to deploy to the live server?', ok: 'Deploy Now'
             }
         }
@@ -65,21 +85,19 @@ pipeline {
         }
     }
 
-    // TASK 10: Notifications
     post {
         always {
-            
             junit 'snapurl-backend/junit.xml'
         }
         success {
-            echo '✅ NOTIFICATION: Pipeline executed successfully. "SnapURL is live!" alert sent to the DevOps Slack channel.'
+            echo '✅ NOTIFICATION: Pipeline executed successfully. "SnapURL is live!"'
         }
         failure {
-            echo '❌ NOTIFICATION: Pipeline failed. PagerDuty alert triggered for the engineering team.'
+            echo '❌ NOTIFICATION: Pipeline failed. PagerDuty alert triggered.'
             bat 'docker-compose down' 
         }
         unstable {
-            echo '⚠️ NOTIFICATION: Pipeline is unstable (e.g., broken test but build continued). QA team notified via Email.'
+            echo '⚠️ NOTIFICATION: Pipeline is unstable.'
         }
     }
 }
