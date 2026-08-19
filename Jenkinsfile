@@ -3,16 +3,19 @@ pipeline {
 
     environment {
         MONGO_URI = credentials('mongo-uri')
+        COMPOSE_PROJECT_NAME = "snapurl-${env.BRANCH_NAME.replaceAll('/', '-')}"
+        BACKEND_PORT  = "${env.BRANCH_NAME == 'main' ? '5001' : env.BRANCH_NAME == 'develop' ? '5011' : '5021'}"
+        FRONTEND_PORT = "${env.BRANCH_NAME == 'main' ? '8001' : env.BRANCH_NAME == 'develop' ? '8011' : '8021'}"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        
         stage('Install Dependencies') {
             steps {
                 echo 'Installing packages sequentially...'
@@ -40,8 +43,7 @@ pipeline {
                     steps {
                         echo 'Checking for vulnerabilities...'
                         dir('snapurl-backend') {
-                            // We use || exit 0 so the pipeline doesn't fail if minor vulnerabilities are found
-                            bat 'npm audit --audit-level=high || exit 0' 
+                            bat 'npm audit --audit-level=high || exit 0'
                         }
                     }
                 }
@@ -71,7 +73,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application to the Test Server environment...'
+                echo "Deploying ${env.BRANCH_NAME} — backend:${env.BACKEND_PORT}, frontend:${env.FRONTEND_PORT}"
                 bat 'docker-compose up -d'
             }
         }
@@ -80,7 +82,7 @@ pipeline {
             steps {
                 echo 'Verifying the live deployment...'
                 sleep time: 5, unit: 'SECONDS'
-                bat 'curl http://localhost:5001'
+                bat "curl http://localhost:%BACKEND_PORT%"
             }
         }
     }
@@ -94,7 +96,7 @@ pipeline {
         }
         failure {
             echo '❌ NOTIFICATION: Pipeline failed. PagerDuty alert triggered.'
-            bat 'docker-compose down' 
+            bat 'docker-compose down'
         }
         unstable {
             echo '⚠️ NOTIFICATION: Pipeline is unstable.'
