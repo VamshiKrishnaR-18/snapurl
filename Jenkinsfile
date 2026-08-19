@@ -8,9 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                url: 'https://github.com/VamshiKrishnaR-18/snapurl.git',
-                credentialsId: 'github-creds'
+                checkout scm
             }
         }
 
