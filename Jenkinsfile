@@ -29,30 +29,30 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running unit tests before building Docker image...'
+                echo 'Running unit tests...'
                 dir('snapurl-backend') {
                     bat 'npm test'
                 }
             }
         }
 
-        stage('Docker Image Build') {
+        stage('Docker Image') {
             steps {
-                echo 'Tests passed! Building Docker images...'
+                echo 'Building Docker images...'
                 bat 'docker-compose build'
             }
         }
 
-        stage('Docker Container Run') {
+        stage('Deploy') {
             steps {
-                echo 'Starting containers...'
+                echo 'Deploying application to the Test Server environment...'
                 bat 'docker-compose up -d'
             }
         }
 
-        stage('Application Test') {
+        stage('Application Verification') {
             steps {
-                echo 'Waiting for services to start, then verifying API...'
+                echo 'Verifying the live deployment...'
                 sleep time: 5, unit: 'SECONDS'
                 bat 'curl http://localhost:5001'
             }
@@ -61,15 +61,16 @@ pipeline {
 
     post {
         always {
-            echo 'Publishing test reports and cleaning up containers...'
+            // We still want test reports every time
             junit 'snapurl-backend/junit.xml'
-            bat 'docker-compose down'
         }
         success {
-            echo 'Task 8 Pipeline executed successfully ✅'
+            // Look here! No container teardown. The app stays running!
+            echo 'Task 9: Application successfully DEPLOYED to the test environment! 🚀'
         }
         failure {
-            echo 'Pipeline failed ❌'
+            echo 'Deployment failed ❌ Rolling back/Cleaning up...'
+            bat 'docker-compose down' 
         }
     }
 }
