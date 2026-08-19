@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from './index.js';
+import app from './server.js';
 
 describe('API Endpoint Tests', () => {
     test('GET / should return a 200 status code', async () => {
