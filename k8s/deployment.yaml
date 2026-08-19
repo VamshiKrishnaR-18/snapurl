@@ -20,4 +20,7 @@ spec:
             - containerPort: 5000
           env:
             - name: MONGO_URI
-              value: "mongodb+srv://vamshisid18_db_user:gyn0KxUrA1kKnbdP@cluster0.cxzwj81.mongodb.net/snapurl"
+               valueFrom:
+                  secretKeyRef:
+                    name: mongo-secret
+                    key: MONGO_URI
