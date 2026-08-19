@@ -9,6 +9,6 @@ services:
   frontend:
     build: ./snapurl-frontend
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT}:80"
     depends_on:
       - backend
