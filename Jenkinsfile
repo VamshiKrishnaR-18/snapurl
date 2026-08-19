@@ -41,6 +41,14 @@ pipeline {
             }
         }
 
+        // TASK 11: Pipeline Approval
+        stage('Approval') {
+            steps {
+                
+                input message: 'Ready to deploy to the live server?', ok: 'Deploy Now'
+            }
+        }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying application to the Test Server environment...'
@@ -57,18 +65,21 @@ pipeline {
         }
     }
 
+    // TASK 10: Notifications
     post {
         always {
-            // We still want test reports every time
+            
             junit 'snapurl-backend/junit.xml'
         }
         success {
-            // Look here! No container teardown. The app stays running!
-            echo 'Task 9: Application successfully DEPLOYED to the test environment! 🚀'
+            echo '✅ NOTIFICATION: Pipeline executed successfully. "SnapURL is live!" alert sent to the DevOps Slack channel.'
         }
         failure {
-            echo 'Deployment failed ❌ Rolling back/Cleaning up...'
+            echo '❌ NOTIFICATION: Pipeline failed. PagerDuty alert triggered for the engineering team.'
             bat 'docker-compose down' 
+        }
+        unstable {
+            echo '⚠️ NOTIFICATION: Pipeline is unstable (e.g., broken test but build continued). QA team notified via Email.'
         }
     }
 }
