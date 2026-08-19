@@ -1,18 +1,18 @@
-# Use an official Node runtime
-FROM node:20-alpine
+# Build Stage
+FROM node:20-alpine AS builder
 
-# Set the working directory
-WORKDIR /usr/src/app
-
-# Copy package files and install dependencies
+WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy the application code
 COPY . .
+RUN npm run build
 
-# Expose Vite's default port
-EXPOSE 5173
+# Production Stage
+FROM nginx:alpine
 
-# Start the Vite development server and expose it to the network
-CMD ["npm", "run", "dev", "--", "--host"]
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
