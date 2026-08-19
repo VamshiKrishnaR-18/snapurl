@@ -1,4 +1,4 @@
-import 'dotenv/config'; // Loads variables from the .env file
+import 'dotenv/config'; 
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -10,10 +10,17 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Connect securely using the environment variable
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch(err => console.error('Failed to connect to MongoDB', err));
+// Connect to MongoDB only if MONGO_URI is provided
+if (process.env.MONGO_URI) {
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('Connected to MongoDB Atlas'))
+    .catch(err => console.error('Failed to connect to MongoDB', err));
+}
+
+// Health check / root route (satisfies GET / test)
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'SnapURL API is running' });
+});
 
 app.post('/api/shorten', async (req, res) => {
   const { originalUrl, customAlias } = req.body;
@@ -42,6 +49,15 @@ app.post('/api/shorten', async (req, res) => {
   }
 });
 
+app.get('/api/urls', async (req, res) => {
+  try {
+    const urls = await Url.find().sort({ createdAt: -1 });
+    res.json(urls);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error while fetching URLs' });
+  }
+});
+
 app.get('/:shortId', async (req, res) => {
   const { shortId } = req.params;
   
@@ -62,15 +78,10 @@ app.get('/:shortId', async (req, res) => {
   }
 });
 
-app.get('/api/urls', async (req, res) => {
-  try {
-    const urls = await Url.find().sort({ createdAt: -1 });
-    res.json(urls);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error while fetching URLs' });
-  }
-});
-
-app.listen(5000, () => console.log('SnapURL Engine running on port 5000'));
+// Start server only when not running automated tests
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`SnapURL Engine running on port ${PORT}`));
+}
 
 export default app;
