@@ -1,13 +1,9 @@
-const request = require('supertest');
-// Import your express app. 
-// Note: You must export 'app' from server.js for this to work (e.g., module.exports = app;)
-const app = require('./server'); 
+import request from 'supertest';
+import app from './index.js';
 
 describe('API Endpoint Tests', () => {
     test('GET / should return a 200 status code', async () => {
         const response = await request(app).get('/');
-        
-        // This is a real assertion testing your actual server code
         expect(response.statusCode).toBe(200);
     });
 

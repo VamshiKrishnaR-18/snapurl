@@ -73,4 +73,4 @@ app.get('/api/urls', async (req, res) => {
 
 app.listen(5000, () => console.log('SnapURL Engine running on port 5000'));
 
-module.exports = app;
+export default app;
