@@ -4,7 +4,7 @@ pipeline {
     environment {
         MONGO_URI = credentials('mongo-uri')
         COMPOSE_PROJECT_NAME = "snapurl-${env.BRANCH_NAME.replaceAll('/', '-')}"
-        BACKEND_PORT  = "${env.BRANCH_NAME == 'main' ? '5001' : env.BRANCH_NAME == 'develop' ? '5011' : '5021'}"
+        BACKEND_PORT  = "${env.BRANCH_NAME == 'main' ? '5101' : env.BRANCH_NAME == 'develop' ? '5011' : '5021'}"
         FRONTEND_PORT = "${env.BRANCH_NAME == 'main' ? '8001' : env.BRANCH_NAME == 'develop' ? '8011' : '8021'}"
     }
 
