@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         MONGO_URI = credentials('mongo-uri')
-        // TASK 13 FIX: isolate each branch's compose project and ports
         COMPOSE_PROJECT_NAME = "snapurl-${env.BRANCH_NAME.replaceAll('/', '-')}"
         BACKEND_PORT  = "${env.BRANCH_NAME == 'main' ? '5001' : env.BRANCH_NAME == 'develop' ? '5011' : '5021'}"
         FRONTEND_PORT = "${env.BRANCH_NAME == 'main' ? '8001' : env.BRANCH_NAME == 'develop' ? '8011' : '8021'}"
@@ -44,7 +43,7 @@ pipeline {
                     steps {
                         echo 'Checking for vulnerabilities...'
                         dir('snapurl-backend') {
-                            // We use || exit 0 so the pipeline doesn't fail if minor vulnerabilities are found
+                            
                             bat 'npm audit --audit-level=high || exit 0'
                         }
                     }
