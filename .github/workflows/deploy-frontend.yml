@@ -1,0 +1,53 @@
+name: CI/CD Pipeline for SnapURL Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the source code
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Set up Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 2. Install dependencies for the frontend
+      - name: Install Dependencies
+        working-directory: ./snapurl-frontend
+        run: npm install
+
+      # 3. Build the frontend application (Vite build)
+      - name: Build Application
+        working-directory: ./snapurl-frontend
+        run: npm run build --if-present
+
+      # 4. Run basic tests
+      # (Assumes you have a test script in package.json)
+      - name: Run Tests
+        working-directory: ./snapurl-frontend
+        run: npm test --if-present
+
+      # Authenticate with Container Registry (Docker Hub)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 5. Build a Docker image using the frontend Dockerfile
+      - name: Build Docker Image
+        working-directory: ./snapurl-frontend
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/snapurl-frontend:${{ github.sha }} .
+
+      # 6. Push the Docker image to a container registry
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/snapurl-frontend:${{ github.sha }}
