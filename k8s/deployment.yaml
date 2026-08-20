@@ -20,7 +20,7 @@ spec:
             - containerPort: 5000
           env:
             - name: MONGO_URI
-               valueFrom:
-                  secretKeyRef:
-                    name: mongo-secret
-                    key: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_URI
