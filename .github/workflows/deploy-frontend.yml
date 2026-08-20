@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-push-frontend:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       # 1. Checkout the source code
@@ -31,7 +31,6 @@ jobs:
         run: npm run build --if-present
 
       # 4. Run basic tests
-      # (Assumes you have a test script in package.json)
       - name: Run Tests
         working-directory: ./snapurl-frontend
         run: npm test --if-present
@@ -51,3 +50,10 @@ jobs:
       # 6. Push the Docker image to a container registry
       - name: Push Docker Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/snapurl-frontend:${{ github.sha }}
+
+      # 7. Deploy to Local Kubernetes
+      - name: Deploy to Local Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl set image deployment/snapurl-frontend-deployment snapurl-frontend=${{ secrets.DOCKER_USERNAME }}/snapurl-frontend:${{ github.sha }}

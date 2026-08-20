@@ -7,7 +7,8 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    # 1. LOCAL POWERSHELL RUNNER
+    runs-on: self-hosted
 
     steps:
       # 1. Checkout the source code
@@ -25,7 +26,7 @@ jobs:
         working-directory: ./snapurl-backend
         run: npm install
 
-      # 3. Build the application (if a build script exists)
+      # 3. Build the application
       - name: Build Application
         working-directory: ./snapurl-backend
         run: npm run build --if-present
@@ -42,7 +43,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 5. Build a Docker image using the backend Dockerfile
+      # 5. Builds a Docker image using the backend Dockerfile
       - name: Build Docker Image
         working-directory: ./snapurl-backend
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/snapurl-backend:${{ github.sha }} .
@@ -50,3 +51,10 @@ jobs:
       # 6. Push the Docker image to a container registry
       - name: Push Docker Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/snapurl-backend:${{ github.sha }}
+
+      # 7. Deploy to Local Kubernetes
+      - name: Deploy to Local Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl set image deployment/snapurl-backend-deployment snapurl-backend=${{ secrets.DOCKER_USERNAME }}/snapurl-backend:${{ github.sha }}

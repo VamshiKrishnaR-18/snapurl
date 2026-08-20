@@ -1,0 +1,51 @@
+# ------------------- BACKEND DEPLOYMENT -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snapurl-backend-deployment
+  labels:
+    app: snapurl-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snapurl-backend
+  template:
+    metadata:
+      labels:
+        app: snapurl-backend
+    spec:
+      containers:
+      - name: snapurl-backend
+        # Pulls backend image from Docker Hub
+        image: vamshi7923/snapurl-backend:6d8cd32be455ef2e33e31d2eb070353359dc339b
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+
+---
+# ------------------- FRONTEND DEPLOYMENT -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snapurl-frontend-deployment
+  labels:
+    app: snapurl-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snapurl-frontend
+  template:
+    metadata:
+      labels:
+        app: snapurl-frontend
+    spec:
+      containers:
+      - name: snapurl-frontend
+        # Pulls frontend image from Docker Hub
+        image: vamshi7923/snapurl-frontend:6d8cd32be455ef2e33e31d2eb070353359dc339b
+        ports:
+        - containerPort: 80
