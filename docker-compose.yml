@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./snapurl-backend
+    container_name: snap-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./snapurl-backend/.env
+
+  frontend:
+    build: ./snapurl-frontend
+    container_name: snap-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
